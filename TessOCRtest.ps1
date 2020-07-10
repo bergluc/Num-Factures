@@ -2,7 +2,7 @@ Set-Location '\\MFP11222796\FILE_SHARE\002-Facturation-Numériser_Factures'
 
 $TimeStamp = Get-Date -Format yyyyMMdd_HHmmss
 Add-Content -Path 'C:\temp\transactions.txt' -Value $TimeStamp
-$newdir = '\historique\' + $TimeStamp 
+$newdir = 'historique\' + $TimeStamp 
 New-Item -Path $newdir -ItemType Directory
 
 Get-ChildItem -Filter '*.tif' -Recurse | ForEach-Object {
