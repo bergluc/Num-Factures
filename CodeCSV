@@ -1,0 +1,4 @@
+$csv = Import-Csv C:\temp\InstImp.csv
+$csv | ForEach-Object {
+...
+}
