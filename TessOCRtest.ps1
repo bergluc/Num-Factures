@@ -1,17 +1,29 @@
-Set-Location 'C:\Users\lroberge\Desktop\FAT'
-
+#Obtention de la date et de l'heure
 $TimeStamp = Get-Date -Format yyyyMMdd_HHmmss
-Add-Content -Path 'Transactions.txt' -Value $TimeStamp
-$newdir = 'Historique\' + $TimeStamp 
+
+#Ajout de la date/heure dans le fichier de transactions (log)
+Add-Content -Path 'C:\temp\transactions.txt' -Value $TimeStamp
+
+#Création du répertoire pour l'historique des fichiers traités
+$newdir = 'C:\temp\historique\' + $TimeStamp 
 New-Item -Path $newdir -ItemType Directory
 
+#À changer par move-item en production --> faut alors enlever le -Recurse?
+copy-item \\mfp11222796\FILE_SHARE\002-Facturation-Numériser_Factures\* -Recurse -destination C:\temp\AT
+
+#Changement du répertoire de traitement
+Set-Location 'C:\temp\AT'
+
+#Traitement OCR des factures numérisées, journalisation et transfert des fichiers TIF dans l'historique
 Get-ChildItem -Filter '*.tif' -Recurse | ForEach-Object {
     $newname = $_.BaseName + $TimeStamp
-    C:\Users\lroberge\AppData\Local\Tesseract-OCR\tesseract.exe $_.Name $newname -l fra pdf
-	Add-Content -Path 'C:\Users\lroberge\Desktop\FAT\Transactions.txt' -Value $_.Name
-	move-item -path $_.Name -destination $newdir 
+    C:\Users\lroberge\AppData\Local\Tesseract-OCR\tesseract.exe $_.FullName $newname -l fra pdf
+	Add-Content -Path 'C:\temp\transactions.txt' -Value $_.Name
+	move-item -path $_.FullName -destination $newdir 
 }
 
+#Transfert des factures PDF dans le répertoire de recherche de la comptabilité
 Get-ChildItem -Filter '*.pdf' | ForEach-Object {
-    move-item -path $_.Name -destination C:\Users\lroberge\Desktop\Index
+    move-item -path $_.FullName -destination C:\Users\lroberge\Desktop\Index
 }
+ #Il reste un ou des répertoires après les déplacements. Remove si non vide?
