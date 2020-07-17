@@ -1,4 +1,6 @@
-$csv = Import-Csv C:\temp\InstImp.csv
-$csv | ForEach-Object {
-...
+Clear-Host
+$FilePath = "Imprimantes.csv"
+$Stuff = Import-CSV $FilePath
+ForEach ($Imprimante in $Stuff) {
+Write-Host "$($Imprimante.Impr) - $($Imprimante.Inst) - $($Imprimante.Dossier)"
 }
