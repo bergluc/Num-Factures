@@ -9,7 +9,7 @@ Add-Content -Path $Fact + 'transactions.txt' -Value $TimeStamp
 
 #Futur Import=Csv et boucle 
 $Inst = '300'
-$Doss = '\\mfp11222796\FILE_SHARE\'
+$Dossier = '\\mfp11222796\FILE_SHARE\'
 $Impr = 'PHOACHAT1'
 
 #Création du répertoire pour l'historique des fichiers traités
@@ -17,7 +17,7 @@ $newdir = $Fact + 'historique\' + $TimeStamp +'_' + $Inst
 New-Item -Path $newdir -ItemType Directory
 
 #À changer par move-item en production --> faut alors enlever le -Recurse?
-$Source = $Doss + $Mod + '*'
+$Source = $Dossier + $Mod + '*'
 copy-item $Sources -Recurse -destination $Fact + 'AT'
 
 #Enlever le sous-dossier TestNum en production
