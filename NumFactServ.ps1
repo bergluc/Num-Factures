@@ -1,16 +1,20 @@
 #Obtention de la date et de l'heure
 $TimeStamp = Get-Date -Format yyyyMMdd_HHmmss
 $An = Get-Date -Format yyyy
-$Fact = 'E:\Fichiers\Rapports Regionaux\Factures envoyées au siège social\Numérisation\'
+$Fact = '\\cldvsrvfs01\fichiers\Rapports Regionaux\Factures envoyées au siège social\Numérisation\'
 $Mod = '002-Facturation-Numériser_Factures\'
 
 #Ajout de la date/heure dans le fichier de transactions (log)
 Add-Content -Path $Fact + 'transactions.txt' -Value $TimeStamp
 
-#Futur Import=Csv et boucle 
-$Inst = '300'
-$Dossier = '\\mfp11222796\FILE_SHARE\'
-$Impr = 'PHOACHAT1'
+#Import=Csv et boucle 
+$FilePath = "Imprimantes.csv"
+$Contenu = Import-CSV $FilePath
+
+ForEach ($Imprimante in $Contenu) {
+$Impr = $($Imprimante.Impr)
+$Inst = $($Imprimante.Inst)
+$Dossier = $($Imprimante.Dossier)
 
 #Création du répertoire pour l'historique des fichiers traités
 $newdir = $Fact + 'historique\' + $TimeStamp +'_' + $Inst
@@ -40,3 +44,4 @@ Get-ChildItem -Filter '*.pdf' | ForEach-Object {
 }
 #Suppressions des répertoires après les déplacements de fichiers.
 remove-item -path .\*
+}
