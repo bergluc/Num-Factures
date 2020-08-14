@@ -1,6 +1,0 @@
-Clear-Host
-$FilePath = "Imprimantes.csv"
-$Stuff = Import-CSV $FilePath
-ForEach ($Imprimante in $Stuff) {
-Write-Host "$($Imprimante.Impr) - $($Imprimante.Inst) - $($Imprimante.Dossier)"
-}

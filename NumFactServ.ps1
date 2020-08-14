@@ -5,6 +5,7 @@ $Fact = '\\cldvsrvfs01\fichiers\Rapports Regionaux\Factures envoyées au siège 
 $Mod = '002-Facturation-Numériser_Factures\'
 
 #Ajout de la date/heure dans le fichier de transactions (log)
+# --- > Ajouter un test : si le fichier n'existe pas, il faut le créer
 $Trans = $Fact + 'transactions.txt'
 Add-Content -Path $Trans -Value $TimeStamp
 
@@ -31,7 +32,7 @@ ForEach ($Imprimante in $Contenu) {
 	If(Test-Path $SourDIR){
 
 		#Création du répertoire pour l'historique des fichiers traités
-		$newdir = $Fact + 'historique\' + $TimeStamp +'_' + $Inst
+		$newdir = $Fact + 'historique\' + $TimeStamp + '_' + $Inst + '\'
 		New-Item -Path $newdir -ItemType Directory
 
 		#Copie des factures dans le dossier AT (à traiter)
@@ -47,10 +48,14 @@ ForEach ($Imprimante in $Contenu) {
 
 		#Traitement OCR des factures numérisées, journalisation et transfert des fichiers TIF dans l'historique
 		Get-ChildItem -Filter '*.tif' -Recurse | ForEach-Object {
+			$TimeStamp = Get-Date -Format yyyyMMdd_HHmmssff
 	    		$newname =  $Inst + '_' + $Impr + '_' + $TimeStamp + '_' + $_.BaseName
 	    		C:\'Program Files'\Tesseract-OCR\tesseract.exe $_.FullName $newname -l fra pdf
-			Add-Content -Path $Trans -Value $_.Name
-			move-item -path $_.FullName -destination $newdir 
+			$Journal = $_.Name + " ---> " + $newname			
+			Add-Content -Path $Trans -Value $Journal
+			$NouvDossNom = $newdir + $TimeStamp + $_.Name
+			Add-Content -Path $Trans -Value $NouvDossNom
+			move-item -path $_.FullName -destination $NouvDossNom 
 		}
 
 		#Transfert des factures PDF dans le répertoire de recherche de la comptabilité
@@ -59,6 +64,6 @@ ForEach ($Imprimante in $Contenu) {
 		}
 	
 		#Suppressions des répertoires après les déplacements de fichiers.
-		remove-item -path .\*
+		remove-item -path .\* -Force
 	}
 }
