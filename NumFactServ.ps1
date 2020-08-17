@@ -8,31 +8,34 @@ $FactDT = $Fact + 'Numérisation\'
 If(!(Test-Path $FactDT)){New-Item -Path $FactDT -ItemType Directory}
 $Hist = $FactDT + 'historique\'
 If(!(Test-Path $Hist)){New-Item -Path $Hist -ItemType Directory}
+$AT = $FactDT + 'AT'
+If(!(Test-Path $AT)){New-Item -Path $AT -ItemType Directory}
 
-#Dossier des factures numérisés en fonction du nom de modèle sur les copieurs
+#Dossier des factures numérisées en fonction du nom de modèle sur les copieurs
 $Mod = '002-Facturation-Numériser_Factures\'
 
 #Ajout de la date/heure dans le fichier de transactions (log)
-# --- > Ajouter un test : si le fichier n'existe pas, il faut le créer
 $Trans = $FactDT + 'transactions.txt'
 Add-Content -Path $Trans -Value $TimeStamp
 
 #Importation des imprimantes
-# --- > Ajouter un test : si le fichier n'existe pas, arrêter le script
 $FilePath = 'Imprimantes.csv'
+If(!(Test-Path $FilePath)){
+	Add-Content -Path $Trans -Value 'Pas de fichier Imprimantes.csv ---> Fin de traitement'
+	Exit
+}
 $Contenu = Import-CSV $FilePath
+
+#Changement du répertoire de traitement
+Set-Location $AT
 
 #Traitement des factures sur chaque imprimamte
 ForEach ($Imprimante in $Contenu) {
 	$Impr = $($Imprimante.Impr)
 	$Inst = $($Imprimante.Inst)
 	$Dossier = $($Imprimante.Dossier)
-	$Copieur = 'Imprimante : ' + $Impr
+	$Copieur = 'Imprimante : ' + $Impr + ' - ' + $Dossier
 	Add-Content -Path $Trans -Value $Copieur
-
-	#Création du dossier AT (À traiter) s'il n'existe pas
-	$AT = $FactDT + 'AT'
-	If(!(Test-Path $AT)){New-Item -Path $AT -ItemType Directory}
 
 	#Initialisation des dossiers pour la copie des factures numérisées
 	$Source = $Dossier + $Mod + '*'
@@ -53,9 +56,6 @@ ForEach ($Imprimante in $Contenu) {
 		# ---> Enlever le sous-dossier TestNum en production
 		$destdir = $Fact + 'TestNum\' + $An + '\' + $Inst
 		If(!(Test-Path $destdir)){New-Item -Path $destdir -ItemType Directory}
-		
-		#Changement du répertoire de traitement
-		Set-Location $AT
 
 		#Traitement OCR des factures numérisées, journalisation et transfert des fichiers TIF dans l'historique
 		Get-ChildItem -Filter '*.tif' -Recurse | ForEach-Object {
