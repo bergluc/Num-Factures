@@ -1,17 +1,25 @@
-#Obtention de la date et de l'heure
+#Obtention de l'année de la date et de l'heure
 $TimeStamp = Get-Date -Format yyyyMMdd_HHmmssff
 $An = Get-Date -Format yyyy
-$Fact = '\\cldvsrvfs01\fichiers\Rapports Regionaux\Factures envoyées au siège social\Numérisation\'
+
+#Dossier des factures et dossiers de travail
+$Fact = '\\cldvsrvfs01\fichiers\Rapports Regionaux\Factures envoyées au siège social\'
+$FactDT = $Fact + 'Numérisation\'
+If(!(Test-Path $FactDT)){New-Item -Path $FactDT -ItemType Directory}
+$Hist = $FactDT + 'historique\'
+If(!(Test-Path $Hist)){New-Item -Path $Hist -ItemType Directory}
+
+#Dossier des factures numérisés en fonction du nom de modèle sur les copieurs
 $Mod = '002-Facturation-Numériser_Factures\'
 
 #Ajout de la date/heure dans le fichier de transactions (log)
 # --- > Ajouter un test : si le fichier n'existe pas, il faut le créer
-$Trans = $Fact + 'transactions.txt'
+$Trans = $FactDT + 'transactions.txt'
 Add-Content -Path $Trans -Value $TimeStamp
 
 #Importation des imprimantes
 # --- > Ajouter un test : si le fichier n'existe pas, arrêter le script
-$FilePath = "Imprimantes.csv"
+$FilePath = 'Imprimantes.csv'
 $Contenu = Import-CSV $FilePath
 
 #Traitement des factures sur chaque imprimamte
@@ -19,9 +27,11 @@ ForEach ($Imprimante in $Contenu) {
 	$Impr = $($Imprimante.Impr)
 	$Inst = $($Imprimante.Inst)
 	$Dossier = $($Imprimante.Dossier)
+	$Copieur = 'Imprimante : ' + $Impr
+	Add-Content -Path $Trans -Value $Copieur
 
-	#Création du dossier AT s'il n'existe pas
-	$AT = $Fact + 'AT'
+	#Création du dossier AT (À traiter) s'il n'existe pas
+	$AT = $FactDT + 'AT'
 	If(!(Test-Path $AT)){New-Item -Path $AT -ItemType Directory}
 
 	#Initialisation des dossiers pour la copie des factures numérisées
@@ -32,7 +42,7 @@ ForEach ($Imprimante in $Contenu) {
 	If(Test-Path $SourDIR){
 
 		#Création du répertoire pour l'historique des fichiers traités
-		$newdir = $Fact + 'historique\' + $TimeStamp + '_' + $Inst + '\'
+		$newdir = $Hist + $TimeStamp + '_' + $Inst + '\'
 		New-Item -Path $newdir -ItemType Directory
 
 		#Copie des factures dans le dossier AT (à traiter)
@@ -42,7 +52,8 @@ ForEach ($Imprimante in $Contenu) {
 		#Définir le dossier de destination des factures traitées
 		# ---> Enlever le sous-dossier TestNum en production
 		$destdir = $Fact + 'TestNum\' + $An + '\' + $Inst
-
+		If(!(Test-Path $destdir)){New-Item -Path $destdir -ItemType Directory}
+		
 		#Changement du répertoire de traitement
 		Set-Location $AT
 
@@ -54,7 +65,6 @@ ForEach ($Imprimante in $Contenu) {
 			$Journal = $_.Name + " ---> " + $newname			
 			Add-Content -Path $Trans -Value $Journal
 			$NouvDossNom = $newdir + $TimeStamp + $_.Name
-			Add-Content -Path $Trans -Value $NouvDossNom
 			move-item -path $_.FullName -destination $NouvDossNom 
 		}
 
