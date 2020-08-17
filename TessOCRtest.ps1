@@ -17,7 +17,7 @@ Set-Location 'C:\temp\AT'
 #Traitement OCR des factures numérisées, journalisation et transfert des fichiers TIF dans l'historique
 Get-ChildItem -Filter '*.tif' -Recurse | ForEach-Object {
     $newname = $_.BaseName + $TimeStamp
-    C:\Users\lroberge\AppData\Local\Tesseract-OCR\tesseract.exe $_.FullName $newname -l fra pdf
+    C:\'Program Files'\Tesseract-OCR\tesseract.exe $_.FullName $newname -l fra pdf
 	Add-Content -Path 'C:\temp\transactions.txt' -Value $_.Name
 	move-item -path $_.FullName -destination $newdir 
 }
@@ -26,4 +26,5 @@ Get-ChildItem -Filter '*.tif' -Recurse | ForEach-Object {
 Get-ChildItem -Filter '*.pdf' | ForEach-Object {
     move-item -path $_.FullName -destination C:\Users\lroberge\Desktop\Index
 }
- #Il reste un ou des répertoires après les déplacements. Remove si non vide?
+#Suppressions des répertoires après les déplacements de fichiers.
+remove-item -path .\*
