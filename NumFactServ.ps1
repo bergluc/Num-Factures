@@ -49,12 +49,14 @@ ForEach ($Imprimante in $Contenu) {
 		New-Item -Path $newdir -ItemType Directory
 
 		#Copie des factures dans le dossier AT (à traiter)
-		# ---> À changer par move-item en production --> faut alors enlever le -Recurse	
-		copy-item $Source -Recurse -destination $AT
+		# ---> À changer par move-item en production --> faut alors enlever le -Recurse
+		# copy-item $Source -Recurse -destination $AT
+    move-item $Source -destination $AT
 
 		#Définir le dossier de destination des factures traitées
 		# ---> Enlever le sous-dossier TestNum en production
-		$destdir = $Fact + 'TestNum\' + $An + '\' + $Inst
+		# $destdir = $Fact + 'TestNum\' + $An + '\' + $Inst
+		$destdir = $Fact + $An + '\' + $Inst
 		If(!(Test-Path $destdir)){New-Item -Path $destdir -ItemType Directory}
 
 		#Traitement OCR des factures numérisées, journalisation et transfert des fichiers TIF dans l'historique
@@ -62,17 +64,17 @@ ForEach ($Imprimante in $Contenu) {
 			$TimeStamp = Get-Date -Format yyyyMMdd_HHmmssff
 	    		$newname =  $Inst + '_' + $Impr + '_' + $TimeStamp + '_' + $_.BaseName
 	    		C:\'Program Files'\Tesseract-OCR\tesseract.exe $_.FullName $newname -l fra pdf
-			$Journal = $_.Name + " ---> " + $newname			
+			$Journal = $_.Name + " ---> " + $newname
 			Add-Content -Path $Trans -Value $Journal
 			$NouvDossNom = $newdir + $TimeStamp + $_.Name
-			move-item -path $_.FullName -destination $NouvDossNom 
+			move-item -path $_.FullName -destination $NouvDossNom
 		}
 
 		#Transfert des factures PDF dans le répertoire de recherche de la comptabilité
 		Get-ChildItem -Filter '*.pdf' | ForEach-Object {
 	    		move-item -path $_.FullName -destination $destdir
 		}
-	
+
 		#Suppressions des répertoires après les déplacements de fichiers.
 		remove-item -path .\* -Force
 	}
