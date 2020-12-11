@@ -49,9 +49,9 @@ ForEach ($Imprimante in $Contenu) {
 		New-Item -Path $newdir -ItemType Directory
 
 		#Copie des factures dans le dossier AT (à traiter)
-		# ---> À changer par move-item en production --> faut alors enlever le -Recurse
-		# copy-item $Source -Recurse -destination $AT
-    move-item $Source -destination $AT
+		#et suppression des factures sur le photocopieur
+		copy-item $Source -Recurse -destination $AT
+    remove-item $Source -Recurse
 
 		#Définir le dossier de destination des factures traitées
 		# ---> Enlever le sous-dossier TestNum en production
