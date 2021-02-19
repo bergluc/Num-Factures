@@ -19,7 +19,7 @@ $Trans = $FactDT + 'transactions.txt'
 Add-Content -Path $Trans -Value $TimeStamp
 
 #Importation des imprimantes
-$FilePath = 'Imprimantes.csv'
+$FilePath = 'C:\Numérisation des factures\Imprimantes.csv'
 If(!(Test-Path $FilePath)){
 	Add-Content -Path $Trans -Value 'Pas de fichier Imprimantes.csv ---> Fin de traitement'
 	Exit
